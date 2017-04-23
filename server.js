@@ -93,14 +93,20 @@ function onListening(server) {
                         return el.user === userName;
                     });
 
+                    var isPasswordValid = userBase.find((el) => {
+                        return el.id === userName && el.password === password;
+                    })
 
-                    if (isUserInBase(user) && !hasSession) {
+
+                    if (isUserInBase(user) && !hasSession && isPasswordValid) {
                         var token = uuid();
                         console.log(`user ${user.id} logged`);
                         tokenBase.push({user: user.id, token: token});
                         socket.emit('userLogged', {token: token, userName: user.id});
                     } else if (isUserInBase(user) && hasSession) {
                         socket.emit('loginError', `User ${user.id} is already logged`);
+                    } else if (isUserInBase(user) && !isPasswordValid) {
+                        socket.emit('loginError', 'Invalid password.');
                     } else {
                         socket.emit('loginError', 'Register first.');
                     }
