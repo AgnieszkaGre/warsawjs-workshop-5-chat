@@ -1,0 +1,24 @@
+{
+  "name": "warsaw-js-chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AgnieszkaGre/warsawjs-workshop-5-chat.git"
+  },
+  "author": "Agnieszka Gredowska",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AgnieszkaGre/warsawjs-workshop-5-chat/issues"
+  },
+  "homepage": "https://github.com/AgnieszkaGre/warsawjs-workshop-5-chat#readme",
+  "dependencies": {
+    "socket.io": "^1.7.3",
+    "socket.io-client": "^1.7.3",
+    "uuid": "^3.0.1"
+  }
+}
