@@ -15,8 +15,8 @@ function createServer() {
     });
 }
 
-function createUserObject(name, password) {
-    return {id: name, password: password};
+function createUserObject(name, password, socketId) {
+    return {id: name, password: password, socketId: socketId};
 }
 
 function isUserInBase(user) {
@@ -26,20 +26,24 @@ function isUserInBase(user) {
 }
 
 
-
-function logUserIn (user) {
-    if (isUserInBase(user)) {
-
-    };
-}
-
-
 function onListening(server) {
     console.log('started!');
     var socket = io(server);
 
     socket.on('connection', socket => {
         console.log(`new user: ${socket.id}`);
+
+        socket.on('disconnect', function() {
+            var user = userBase.find((el) => {
+                return el.socketId === socket.id;
+            })
+            var index = tokenBase.findIndex((el) => {
+                return el.id === el.user;
+            })
+            console.log(tokenBase);
+            tokenBase.splice(index,1);
+            console.log(tokenBase);
+        })
 
         socket.emit('hello', 'hello!!!');
         socket.broadcast.emit('startMessage', 'Welcome!');
@@ -65,16 +69,17 @@ function onListening(server) {
                     var password = arguments[2];
                     console.log(`registering userName: ${userName}, password: ${password}`);
 
-                    registerNewUser(createUserObject(userName, password));
+                    registerNewUser(createUserObject(userName, password, socket.id));
                     console.log(userBase);
 
                     function registerNewUser(user) {
 
                         if (!isUserInBase(user)) {
                             userBase.push(user);
+                            socket.emit('registrationMessage', "Registration succesful.")
                         } else {
                             console.log(`Registration error. User ${user.id} already exists`);
-                            socket.emit("registrationError", "This user name already exists. Try with different one.")
+                            socket.emit('registrationMessage', 'This user name already exists. Try with different one.')
                         }
                     }
                 }
@@ -82,7 +87,7 @@ function onListening(server) {
                 else if(command === "/login") {
                     var userName = arguments[1];
                     var password = arguments[2];
-                    var user = createUserObject(userName, password);
+                    var user = createUserObject(userName, password, socket.id);
 
                     var hasSession = tokenBase.find((el) => {
                         return el.user === userName;
@@ -94,9 +99,18 @@ function onListening(server) {
                         console.log(`user ${user.id} logged`);
                         tokenBase.push({user: user.id, token: token});
                         socket.emit('userLogged', {token: token, userName: user.id});
+                    } else if (isUserInBase(user) && hasSession) {
+                        socket.emit('loginError', `User ${user.id} is already logged`);
                     } else {
-                        socket.emit('loginError', 'User is already logged');
+                        socket.emit('loginError', 'Register first.');
                     }
+                } else if(command === "/logout") {
+                    var userName = arguments[1];
+                    var index = tokenBase.findIndex((el) => {
+                        return el.user === userName && el.token === token;
+                    })
+                    tokenBase.splice(index,1);
+                    socket.emit('logoutSuccesful', "You logged out.");
                 }
 
             } else {

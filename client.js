@@ -1,14 +1,13 @@
 var io = require('socket.io-client');
 var readline = require('readline');
 var os = require('os');
+var colors = require('colors/safe');
+
 
 var socket = io('http://localhost:3001');
 var userName = "";
 var sessionToken;
 
-// socket.on('hello', (message) => {
-//     console.log(message);
-// })
 
 socket.on('startMessage', (message) => {
     writeLine(message);
@@ -40,7 +39,7 @@ cli.on('line', line => {
 });
 
 socket.on('getNewLine', (line) => {
-    writeLine(line);
+    writeLine(colors.rainbow(line));
 })
 
 socket.on('userLogged', (session) => {
@@ -50,16 +49,14 @@ socket.on('userLogged', (session) => {
     socket.emit('helloNewUser', userName);
 })
 
-socket.on('registrationError', (line) => {
+socket.on('registrationMessage', (line) => {
     writeLine(line);
 })
 
 socket.on('loginError', (line) => {
-    writeLine(line);
+    writeLine(colors.red.underline(line));
 })
 
 socket.on('invalidToken', (line) => {
     writeLine(line);
 })
-
-
